@@ -61,4 +61,5 @@ class VirtualMachine:
                 logger.info(' > Still waiting, {seconds}s have passed.'.format(seconds=counter))
             time.sleep(1)
             counter+=1
+        time.sleep(1)
         logger.info('Action complete')
