@@ -1,0 +1,37 @@
+name: Default
+
+on:
+  push:
+    branches:
+      - main
+
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    env:
+      CONTAINER_IMAGE: virtual-front-io-panel
+      CONTAINER_TAG: latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build container
+        uses: redhat-actions/buildah-build@v1
+        with:
+          build-args: |
+            VERSION=${{ env.CONTAINER_TAG }}
+          image: ${{ env.CONTAINER_IMAGE }}
+          tag: ${{ env.CONTAINER_TAG }}
+          dockerfiles: ./Dockerfile
+
+      - name: Push to registry
+        uses: redhat-actions/push-to-registry@v1.2
+        with:
+          image: ${{ env.CONTAINER_IMAGE }}
+          tag: ${{ env.CONTAINER_TAG }}
+          registry: registry.hub.docker.com/idelsink
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+          password: ${{ secrets.DOCKER_HUB_PASSWORD }}
