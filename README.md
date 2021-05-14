@@ -2,7 +2,7 @@
 
 This is a 'virtual' front IO panel to start and stop [Proxmox](https://www.proxmox.com/) virtual machines using physical buttons.
 
-This service will make sure that only a single VM can run at a time. (E.g. shutdown all other vms before staring up the requested vm)
+This service will make sure that only a single VM can run at a time. (E.g. shutdown all other vms before starting up the requested vm)
 
 This project uses:
 
