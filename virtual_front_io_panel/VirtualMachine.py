@@ -28,9 +28,6 @@ class VirtualMachine:
         return self.getVm().status().current().get().get('status');
 
     def setStatus(self, status, **kwargs):
-        if self.getStatus() == status:
-            logger.info('{vmName} already ')
-            return None;
         if status == 'start':
             if self.getStatus() == 'running':
                 logger.info('Already running {vmName}'.format(vmName=self.getName()))
