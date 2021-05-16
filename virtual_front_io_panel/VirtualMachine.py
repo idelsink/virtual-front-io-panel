@@ -59,10 +59,12 @@ class VirtualMachine:
     def setStatusBlocking(self, status, **kwargs):
         self.setStatus(status, **kwargs)
         counter=0
+        # Wait for all tasks for the machine to finish
         while self.proxmox.nodes(self.getNodeName()).tasks().get(vmid=self.vmid, source='active'):
             if counter and ((counter % 5) == 0):
                 logger.info(' > Still waiting, {seconds}s have passed.'.format(seconds=counter))
             time.sleep(1)
             counter+=1
-        time.sleep(1)
+        # Give the host some time to release the GPU
+        time.sleep(3)
         logger.info('Action complete')
