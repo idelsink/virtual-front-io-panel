@@ -1,7 +1,12 @@
 import time
 import logging
+from retrying import retry
 
 logger = logging.getLogger('virtual-machine')
+
+def retry_wait(attempts, delay):
+    logger.info('Retrying after exception, attempt #{attempts}'.format(attempts=attempts))
+    return delay
 
 class VirtualMachine:
     def __init__(self, proxmoxController, vmid):
@@ -9,6 +14,7 @@ class VirtualMachine:
         self.proxmox = proxmoxController;
         self.vmid = vmid
 
+    @retry(wait_func=retry_wait)
     def getNode(self):
         for node in self.proxmox.nodes.get():
             for vm in self.proxmox.nodes(node['node']).qemu.get():
