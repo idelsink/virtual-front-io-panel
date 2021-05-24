@@ -56,15 +56,23 @@ class VirtualMachine:
             logger.info('Status {status} not implemented'.format(status=status))
             sys.exit(1)
 
+    # Retry with a fixed delay, and limit of 5 times
+    @retry(wait_func=retry_wait, wait_fixed=2000, stop_max_attempt_number=5)
     def setStatusBlocking(self, status, **kwargs):
-        self.setStatus(status, **kwargs)
-        counter=0
-        # Wait for all tasks for the machine to finish
-        while self.proxmox.nodes(self.getNodeName()).tasks().get(vmid=self.vmid, source='active'):
-            if counter and ((counter % 5) == 0):
-                logger.info(' > Still waiting, {seconds}s have passed.'.format(seconds=counter))
-            time.sleep(1)
-            counter+=1
-        # Give the host some time to release the GPU
-        time.sleep(3)
+        taskId = self.setStatus(status, **kwargs)
+
+        if taskId:
+            counter=0
+            # Wait for all tasks for the machine to finish
+            while self.proxmox.nodes(self.getNodeName()).tasks().get(vmid=self.vmid, source='active'):
+                if counter and ((counter % 5) == 0):
+                    logger.info(' > Still waiting, {seconds}s have passed.'.format(seconds=counter))
+                time.sleep(1)
+                counter+=1
+            # Check if task was successful
+            task = self.proxmox.nodes(self.getNodeName()).tasks(taskId).status().get()
+            if task.get('exitstatus') != 'OK':
+                logger.error('Task exit status not OK: {exitStatus}'.format(exitStatus=task.get('exitstatus')))
+                raise Exception('Task exit status not OK')
+
         logger.info('Action complete')
